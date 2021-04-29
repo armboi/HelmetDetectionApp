@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/multiclass_od.iml" filepath="$PROJECT_DIR$/.idea/multiclass_od.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/helmet-detection-app.iml" filepath="$PROJECT_DIR$/.idea/helmet-detection-app.iml" />
     </modules>
   </component>
 </project>

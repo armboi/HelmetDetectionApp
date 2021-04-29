@@ -10,6 +10,8 @@ import numpy as np
 import tensorflow as tf
 
 from research.object_detection.utils import label_map_util
+from object_detection.utils import visualization_utils as vis_util
+from com_in_ineuron_ai_utils.utils import encodeImageIntoBase64
 
 
 class MultiClassObj:
@@ -19,6 +21,7 @@ class MultiClassObj:
         # Name of the directory containing the object detection module we're using
         self.MODEL_NAME = modelPath
         self.IMAGE_NAME = imagePath
+        # print(self.IMAGE_NAME)
         # Grab path to current working directory
         CWD_PATH = os.getcwd()
         # Path to frozen detection graph .pb file, which contains the model that is used
@@ -26,11 +29,12 @@ class MultiClassObj:
         self.PATH_TO_CKPT = os.path.join(CWD_PATH, self.MODEL_NAME, 'frozen_inference_graph.pb')
         # Path to label map file
         self.PATH_TO_LABELS = os.path.join(CWD_PATH, 'research/data', 'labelmap.pbtxt')
-        # PATH_TO_LABELS = "/data/mscoco_label_map.pbtxt"
+        # self.PATH_TO_LABELS = "data/labelmap.pbtxt"
         # Path to images
         self.PATH_TO_IMAGE = os.path.join(CWD_PATH, 'research', self.IMAGE_NAME)
+        print(self.PATH_TO_IMAGE)
         # Number of classes the object detector can identify
-        self.NUM_CLASSES = 12
+        self.NUM_CLASSES = 1
 
         # Load the label map.
         # Label maps map indices to category names, so that when our convolution
@@ -42,9 +46,29 @@ class MultiClassObj:
                                                                          max_num_classes=self.NUM_CLASSES,
                                                                          use_display_name=True)
         self.category_index = label_map_util.create_category_index(self.categories)
+        '''
         self.class_names_mapping = {
-            1: "motorcycle", 2: "with_helmet", 3: "without_helmet"
-        }
+            1: "person", 2: "bicycle", 3: "car", 4: "motorcycle", 5: "airplane", 6: "bus", 7: "train", 8: "truck",
+            9: "boat",
+            10: "traffic light",
+            11: "fire hydrant", 13: "stop sign", 14: "parking meter", 15: "bench", 16: "bird", 17: "cat", 18: "dog",
+            19: "horse", 20: "sheep",
+            21: "cow", 22: "elephant", 23: "bear", 24: "zebra", 25: "giraffe", 27: "backpack", 28: "umbrella",
+            31: "handbag",
+            32: "tie", 33: "suitcase",
+            34: "frisbee", 35: "skis", 36: "snowboard", 37: "sports ball", 38: "kite", 39: "baseball bat",
+            40: "baseball glove",
+            41: "skateboard", 42: "surfboard", 43: "tennis racket", 44: "bottle",
+            46: "wine glass", 47: "cup", 48: "fork", 49: "knife", 50: "spoon", 51: "bowl", 52: "banana", 53: "apple",
+            54: "sandwich", 55: "orange", 56: "broccoli", 57: "carrot", 58: "hot dog", 59: "pizza", 60: "donut",
+            61: "cake", 62: "chair", 63: "couch", 64: "potted plant", 65: "bed", 67: "dining table", 70: "toilet",
+            72: "tv",
+            73: "laptop", 74: "mouse", 75: "remote", 76: "keyboard", 77: "cell", 78: "microwave", 79: "oven",
+            80: "toaster",
+            81: "sink", 82: "refrigerator", 84: "book", 85: "clock", 86: "vase", 87: "scissors", 88: "teddy bear",
+            89: "hair drier", 90: "toothbrush"
+        }'''
+        self.class_names_mapping = {1: "Helmets"}
         self.detection_graph = tf.Graph()
         with self.detection_graph.as_default():
             od_graph_def = tf.GraphDef()
@@ -91,7 +115,7 @@ class MultiClassObj:
 
         top_classes = classes.flatten()
         # Selecting class 2 and 3
-        top_classes = top_classes[top_classes > 1]
+        # top_classes = top_classes[top_classes > 1]
         res_list = [top_classes[i] for i in res]
 
         class_final_names = [self.class_names_mapping[x] for x in res_list]
@@ -135,15 +159,23 @@ class MultiClassObj:
         # print(boxes.shape)
         # Draw the results of the detection (aka 'visulaize the results')
 
-        # vis_util.visualize_boxes_and_labels_on_image_array(
-        #     image,
-        #     np.squeeze(boxes),
-        #     np.squeeze(classes).astype(np.int32),
-        #     np.squeeze(scores),
-        #     self.category_index,
-        #     use_normalized_coordinates=True,
-        #     line_thickness=8,
-        #     min_score_thresh=0.60)
+        vis_util.visualize_boxes_and_labels_on_image_array(
+            image,
+            np.squeeze(boxes),
+            np.squeeze(classes).astype(np.int32),
+            np.squeeze(scores),
+            self.category_index,
+            use_normalized_coordinates=True,
+            line_thickness=8,
+            min_score_thresh=0.40)
+        output_filename = 'output4.jpg'
+        cv2.imwrite(output_filename, image)
+        opencodedbase64 = encodeImageIntoBase64("output4.jpg")
+        # json_image = dict(zip(img_dict, image_64_encode_list))
+        # print(open_output_image)
+        # plt.savefig(PATH + '\\' + arr.split('.')[0] + '_labeled.jpg')
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
         #
         # # All the results have been drawn on image. Now display the image.
         # cv2.imshow('Object detector', image)
@@ -153,4 +185,5 @@ class MultiClassObj:
         #
         # # Clean up
         # cv2.destroyAllWindows()
+        listOfOutput.append({"image": opencodedbase64.decode('utf-8')})
         return listOfOutput
